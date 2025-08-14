@@ -9,12 +9,19 @@ use std::io;
 use std::io::Write;
 use std::collections::HashMap;
 
+fn save(data: &mut User) {
+    let mut file = File::open("utils.txt");
+    let items = "-".join(data.items);
+    file.write_all(format!("{}:{}:{}:{}", data.name, items, data.progress, data.route));
+}
+
 struct Story{
     start: HashMap<i32, String>,
     hanako: HashMap<i32, String>,
     futaba: HashMap<i32, String>,
     takeshi: HashMap<i32, String>,
     hijikata: HashMap<i32, String>,
+    kami: HashMap<i32, String>,
 }
 
 impl Story{
@@ -25,6 +32,7 @@ impl Story{
             futaba: HashMap::new(),
             takeshi: HashMap::new(),
             hijikata: HashMap::new(),
+            kami: HashMap::new(),
         };
 
         ///////////
@@ -33,7 +41,7 @@ impl Story{
         //       //
         ///////////
 
-        story.start.insert(0000, "It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my heart.".to_string());
+        story.start.insert(0000, format!("It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my {}.".to_string(), "heart".red().bold());
         story
     }
 }
@@ -53,11 +61,13 @@ impl Help {
 
 
 struct Commands {
+    user: User
 
 }
 
 impl Commands {
     fn new(command: &str, story: &mut Story) {
+        let mut
         let args = command.split(" ");
         let args: Vec<&str> = args.collect();
         let command = args[0];
@@ -83,7 +93,7 @@ impl Commands {
                     //load from file, play last progress message
                 }
                 "new" => {
-                    let mut user = User::new("namehere");
+                    let mut user = User::new();
                 }
                 "" => {
                     println!("storyprogress");
@@ -111,13 +121,40 @@ struct User {
 
 impl User {
     fn new(name: &str) -> Self {
-        let mut user = User {
-            name: name.to_string(),
-            items: vec![],
-            progress: 0000,
-            route: "start".to_string(),
-        };
-        user
+        if let Ok(contents) = std::fs::read_to_string("utils.txt"){
+            let contents = contents.trim().split(":");
+            let contents = contents.collect::<Vec<&str>>();
+            if contents.len() < 1 {
+            let mut user = User {
+                name: name.to_string(),
+                items: vec![],
+                progress: 0,
+                route: "start".to_string(),
+            };
+            user
+            } else {
+                let name = contents[0];
+                let items = contents[1];
+                let items = items.split("-");
+                let items = items.collect::<Vec<String>>();
+                let mut user = User {
+                    name: name.to_string(),
+                    items: items,
+                    progress: contents[2],
+                    route: contents[3],
+                };
+                user
+            };
+        } else {
+            let _file = File::create("utils.txt");
+            let mut user = User {
+                name: name.to_string(),
+                items: vec![],
+                progress: 0,
+                route: "start".to_string(),
+            };
+            user
+        }
     }
 }
 
