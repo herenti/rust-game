@@ -1,14 +1,42 @@
 /*
 romance novel, help command to look up terms and command usage. dating sim esque with multple romantic interests. choose gender/orientation in the beginning? set phrases based on character gender. have romantic interests be based on orientation. one hidden romantic interest is the divine. divine route attained by doing temple stuff, progress into a further story of spiritual activity. add items? probably wont need items in this game. maybe can have items but are not usable and just for the purpose of examining them. commision art of characters?
-romantic interest story routes are defined by number code. the 100000s will be one route. the 200000s will be another route. 000000 will be before a route is set. progress in route will be defined by 100001 and the game will load on the progress number from save file. perhaps 1a0001, 1b0001 etc. for sub routes in each route? save user name and gender/orientation and items to file as well.
-KEEP IT SIMPLE.
+ each route? save user name and gender/orientation and items to file as well.
+KEEP IT SIMPLE. only one choice in game should be for romantic interest. get to know interests before making decisions.
  */
 
 use colored::Colorize;
 use std::io;
 use std::io::Write;
+use std::collections::HashMap;
 
+struct Story{
+    start: HashMap<i32, String>,
+    hanako: HashMap<i32, String>,
+    futaba: HashMap<i32, String>,
+    takeshi: HashMap<i32, String>,
+    hijikata: HashMap<i32, String>,
+}
 
+impl Story{
+    fn init() -> Self {
+        let mut story = Story {
+            start: HashMap::new(),
+            hanako: HashMap::new(),
+            futaba: HashMap::new(),
+            takeshi: HashMap::new(),
+            hijikata: HashMap::new(),
+        };
+
+        ///////////
+        //       //
+        // start //
+        //       //
+        ///////////
+
+        story.start.insert(0000, "It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my heart.".to_string());
+        story
+    }
+}
 struct Help {
 
 }
@@ -29,7 +57,7 @@ struct Commands {
 }
 
 impl Commands {
-    fn new(command: &str) {
+    fn new(command: &str, story: &mut Story) {
         let args = command.split(" ");
         let args: Vec<&str> = args.collect();
         let command = args[0];
@@ -40,6 +68,7 @@ impl Commands {
         };
         let command = command.to_lowercase();
         let command = command.as_str();
+        let start_event_mark = 0050;
         match command {
             "help" => {
                 let resp = if args.len() == 0 {
@@ -49,6 +78,16 @@ impl Commands {
                     };
                 println!("[{}]: {}", "Help".blue().bold(), &resp);
 
+                }
+                "load" => {
+                    //load from file, play last progress message
+                }
+                "new" => {
+                    let mut user = User::new("namehere");
+                }
+                "" => {
+                    println!("storyprogress");
+                    //continue story, if no user then prompt to new game. if user progress num == event mark, start event loop.
                 }
 
             _ => {
@@ -67,10 +106,27 @@ struct User {
     name: String,
     items: Vec<String>,
     progress: i32,
+    route: String,
+}
+
+impl User {
+    fn new(name: &str) -> Self {
+        let mut user = User {
+            name: name.to_string(),
+            items: vec![],
+            progress: 0000,
+            route: "start".to_string(),
+        };
+        user
+    }
 }
 
 fn main() {
+
     let mut gamerunning = true;
+    let mut story = Story::init();
+    println!("Welcome to the game. Please type the command [{}] to get started, or if you know what to do, please use whatever {} you wish!!!", "help".green(), "command".green());
+
     while gamerunning {
         print!("[{}]: ", "Command".blue().bold());
         std::io::stdout().flush().unwrap();
@@ -80,7 +136,7 @@ fn main() {
         if input == "quit" {
             gamerunning = false;
         } else {
-            Commands::new(&input);
+            Commands::new(&input, &mut story);
         };
     }
 }
