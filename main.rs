@@ -41,7 +41,7 @@ impl Story{
         //       //
         ///////////
 
-        story.start.insert(0000, format!("It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my {}.".to_string(), "heart".red().bold());
+        story.start.insert(0000, format!("It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my {}.".to_string(), "heart".red().bold()));
         story
     }
 }
@@ -140,8 +140,8 @@ impl User {
                 let mut user = User {
                     name: name.to_string(),
                     items: items,
-                    progress: contents[2],
-                    route: contents[3],
+                    progress: contents[2].parse().expect("reason"),
+                    route: contents[3].to_string(),
                 };
                 user
             };
