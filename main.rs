@@ -1,8 +1,7 @@
 /*
-romance novel, help command to look up terms and command usage. dating sim esque with multple romantic interests. choose gender/orientation in the beginning? set phrases based on character gender. have romantic interests be based on orientation. one hidden romantic interest is the divine. divine route attained by doing temple stuff, progress into a further story of spiritual activity. add items? probably wont need items in this game. maybe can have items but are not usable and just for the purpose of examining them. commision art of characters?
- each route? save user name and gender/orientation and items to file as well.
-KEEP IT SIMPLE. only one choice in game should be for romantic interest. get to know interests before making decisions.
- */
+0/5 routes complete
+Written by: Herenti
+*/
 
 use colored::Colorize;
 use std::io;
@@ -61,14 +60,16 @@ impl Help {
     fn lookup(term: &str, user: User) -> String {
         let resp = match term {
             "list" => {
-                "[save, help, load, quit, lastmessage, new]".to_string()
+                "[help, quit, new, history]".to_string()
             }
-            "me" => {
-                if user.progress > 0 {
-                    format!("\r\nName: {}\r\nItems: {:?}", user.name.yellow(), user.items)
-                } else {
-                    format!("You have not started a game yet. Use the [{}] new command.", "new".green())
-                }
+            "new" => {
+                "Start a new game. You will need to enter your name. This name will be used for the main character. This will erase any previous saved game.".to_string()
+            }
+            "quit" => {
+                "Quit the game. The game autosaves regardless.".to_string()
+            }
+            "history" => {
+                "Show the last 5 story segments.".to_string()
             }
             _ => {
                 format!("{}", "INVALID HELP TERM".red().bold())
@@ -97,30 +98,28 @@ impl Commands {
         let command = command.to_lowercase();
         let command = command.as_str();
         let start_event_mark = 50;
-        let mut user = User::new("");
+        let mut user = User::new("", "c");
         match command {
             "help" => {
                 let resp = if args.len() == 0 {
-                    format!("How to use the help command. You can look up secific terms or commands like so: [{}]. [{}]. To show a list of commands use [{}]. Press enter with no command to continue the story.", "help termhere".green(), "help commandnamehere".green(), "help list".green())
+                    format!("How to use the help command. You can look up secific terms or commands like so: [{}]. [{}]. Terms that can be looked up are in the {} color. Commands that can be used are in {}. To show a list of commands use [{}]. Press enter with no command to continue or start the story.", "help termhere".green(), "help commandnamehere".green(), "cyan".cyan(), "green".green(), "help list".green())
                     } else {
                         Help::lookup(&args, user)
                     };
                 println!("[{}]: {}", "Help".blue().bold(), &resp);
 
                 }
-                "load" => {
-                    //load from file, play last progress message
-                }
+
                 "new" => {
                     print!("[{}]: ", "Enter name".blue().bold());
                     std::io::stdout().flush().unwrap();
                     let mut input = String::new();
                     io::stdin().read_line(&mut input).expect("Failed to read input.");
                     let input = input.trim();
-                    let mut user = User::new(&input);
+                    let mut user = User::new(&input, "n");
                     user.progress = 1;
                     save(&mut user);
-                    println!("created new user: {}", input);
+                    println!("Welcome to the game {}! This game autosaves and autoloads.", input.cyan());
                 }
                 "" => {
                     if user.progress > 0 {
@@ -133,14 +132,14 @@ impl Commands {
                             }
 
                         _ => {
-                            println!("you have not started the game yet. use the new command.");
+
                         }
 
                         //continue story, if no user then prompt to new game. if user progress num == event mark, start event loop.
                     }
                 }
                 else {
-                    println!("you have not started the game yet. use the new command.");
+                    println!("You have not started the game yet. Use the [{}] command.", "new".green());
                 }
                 }
 
@@ -164,7 +163,7 @@ struct User {
 }
 
 impl User {
-    fn new(name: &str) -> Self {
+    fn new(name: &str, operation: &str) -> Self {
         if let Ok(contents) = std::fs::read_to_string("utils.txt"){
             let contents = contents.trim().split(":");
             let contents = contents.collect::<Vec<&str>>();
@@ -176,18 +175,29 @@ impl User {
                 route: "start".to_string(),
             }
             } else {
-                let name = contents[0];
-                let items = contents[1];
-                let items = items.split("-");
-                let items: Vec<String> = items.map(|x| x.trim().to_string()).collect();
-                User {
-                    name: name.to_string(),
-                    items: items,
-                    progress: contents[2].parse().expect("reason"),
-                    route: contents[3].to_string(),
+                if operation == "c" {
+                    let name = contents[0];
+                    let items = contents[1];
+                    let items = items.split("-");
+                    let items: Vec<String> = items.map(|x| x.trim().to_string()).collect();
+                    User {
+                        name: name.to_string(),
+                        items: items,
+                        progress: contents[2].parse().expect("reason"),
+                        route: contents[3].to_string(),
+                    }
+                } else {
+                    User {
+                        name: name.to_string(),
+                        items: vec![],
+                        progress: 0,
+                        route: "start".to_string(),
+                    }
                 }
 
-            }
+                }
+
+
         } else {
             let _file = File::create("utils.txt");
             User {
@@ -204,7 +214,7 @@ fn main() {
 
     let mut gamerunning = true;
     let mut story = Story::init();
-    println!("Welcome to the game. Please type the command [{}] to get started, or if you know what to do, please use whatever {} you wish!!!", "help".green(), "command".green());
+    println!("Welcome to the game. Please type the command [{}] to get started if you are new. If you know what to do, please use whatever {} you wish!!!", "help".green(), "command".green());
 
     while gamerunning {
         print!("[{}]: ", "Command".blue().bold());
