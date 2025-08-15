@@ -18,6 +18,52 @@ fn save(data: &mut User) {
     file.expect("reason").write_all(info);
 }
 
+struct Events {
+
+}
+
+impl Events {
+
+    fn new(user: &mut User) {
+        match user.route.as_str() {
+            "start" => {
+                match user.progress {
+                    50 => {
+                        print!("\r\n[{}] This is an event choice enter y/n:", "Event".blue().bold());
+                        std::io::stdout().flush().unwrap();
+                        let mut input = String::new();
+                        io::stdin().read_line(&mut input).expect("Failed to read input.\r\n");
+                        let input = input.trim();
+                        let input = input.to_lowercase();
+                        let input = input.as_str();
+                        match input{
+                            "y" => {
+                                user.route = "hanako".to_string();
+                                user.progress = 1;
+                                save(user);
+
+                            }
+                            "n" => {
+                                println!("\r\nRoute not yet available. please choose another option.\r\n");
+                                Events::new(user);
+                            }
+                            _ => {
+
+                            }
+                        }
+                    }
+                    _ => {
+
+                    }
+                }
+            }
+            _ => {
+
+            }
+        }
+    }
+}
+
 struct Story{
     start: HashMap<i32, String>,
     hanako: HashMap<i32, String>,
@@ -43,6 +89,8 @@ impl Story{
         // start //
         //       //
         ///////////
+
+        //story.start.insert(1, format!(""));
 
         story.start.insert(1, format!("It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my {}.", "heart".red().bold()));
         story.start.insert(2, format!("[{}] Moving is a huge pain.  I have just moved from Tokyo out to a small village in northern Japan, named {}. It is kind of in the middle of nowhere but the nature is completely stunning. Why did I move out here you ask? Well, I am a student of Daiten university, and there is a study program in this area for something quite interesting.", "October 16th".bold(), "Inumura".cyan()));
@@ -97,6 +145,14 @@ impl Commands {
         };
         let command = command.to_lowercase();
         let command = command.as_str();
+        let start_events = vec![50];
+        let hanako_events = vec![50];
+        /*
+        let futaba_events = vec![50];
+        let takeshi_events = vec![50];
+        let hijikata_events = vec![50];
+        let kami_events = vec![50];
+        */
         let start_event_mark = 50;
         let mut user = User::new("", "c");
         match command {
@@ -106,46 +162,55 @@ impl Commands {
                     } else {
                         Help::lookup(&args, user)
                     };
-                println!("[{}]: {}", "Help".blue().bold(), &resp);
+                println!("\r\n[{}]: {}\r\n", "Help".blue().bold(), &resp);
 
                 }
 
                 "new" => {
-                    print!("[{}]: ", "Enter name".blue().bold());
+                    print!("\r\n[{}]: ", "Enter name".blue().bold());
                     std::io::stdout().flush().unwrap();
                     let mut input = String::new();
-                    io::stdin().read_line(&mut input).expect("Failed to read input.");
+                    io::stdin().read_line(&mut input).expect("Failed to read input.\r\n");
                     let input = input.trim();
                     let mut user = User::new(&input, "n");
                     user.progress = 1;
                     save(&mut user);
-                    println!("Welcome to the game {}! This game autosaves and autoloads.", input.cyan());
+                    println!("\r\nWelcome to the game {}! This game autosaves and autoloads.\r\n", input.cyan());
                 }
                 "" => {
                     if user.progress > 0 {
                         let route = &user.route;
                         match route.as_str() {
                             "start" => {
-                                println!("{}", story.start[&user.progress]);
-                                user.progress += 1;
-                                save(&mut user);
+                                if story.start.contains_key(&user.progress) {
+                                    println!("\r\n[{}]: {}\r\n", "Story".blue().bold(), story.start[&user.progress]);
+                                    if start_events.contains(&user.progress) {
+                                        Events::new(&mut user);
+
+                                    } else {
+                                        user.progress += 1;
+                                        save(&mut user);
+                                    }
+
+                                }
                             }
 
-                        _ => {
+                            _ => {
+
+                            }
+
 
                         }
 
-                        //continue story, if no user then prompt to new game. if user progress num == event mark, start event loop.
-                    }
                 }
                 else {
-                    println!("You have not started the game yet. Use the [{}] command.", "new".green());
+                    println!("\r\nYou have not started the game yet. Use the [{}] command.\r\n", "new".green());
                 }
                 }
 
             _ => {
 
-                println!("{}", "INVALID COMMAND".red().bold());
+                println!("\r\n{}\r\n", "INVALID COMMAND".red().bold());
             }
         }
 
@@ -214,7 +279,7 @@ fn main() {
 
     let mut gamerunning = true;
     let mut story = Story::init();
-    println!("Welcome to the game. Please type the command [{}] to get started if you are new. If you know what to do, please use whatever {} you wish!!!", "help".green(), "command".green());
+    println!("\r\nWelcome to the game. Please type the command [{}] to get started if you are new. If you know what to do, please use whatever {} you wish!!!\r\n", "help".green(), "command".green());
 
     while gamerunning {
         print!("[{}]: ", "Command".blue().bold());
