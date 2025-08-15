@@ -95,7 +95,7 @@ impl Story{
         story.start.insert(1, format!("It was a cloudy and brisk day in the small village where my story began. The story of finding the great treasure of my {}.", "heart".red().bold()));
         story.start.insert(2, format!("[{}] Moving is a huge pain.  I have just moved from Tokyo out to a small village in northern Japan, named {}. It is kind of in the middle of nowhere but the nature is completely stunning. Why did I move out here you ask? Well, I am a student of Daiten university, and there is a study program in this area for something quite interesting.", "October 16th".bold(), "Inumura".cyan()));
         story.start.insert(3, format!("There is a new species of bacteria growing in the mountain forests near the village that might lead to some serious developments in cancer research. This small area is the only place this bacteria has been discovered."));
-        story.start.insert(4, format!("It's name is {}. In some studies with medicine made from this bacteria, the cancer in lab rats has completely dissapeared. Yet I have heard there are some... strange side effects... Not that the project heads were keen on telling us what they were.", "X-1".cyan()));
+        story.start.insert(4, format!("It's name is {}. In some studies with medicine made from this bacteria, the cancer in lab rats has completely disappeared. Yet I have heard there are some... strange side effects... Not that the project heads were keen on telling us what they were.", "X-1".cyan()));
 
         story
     }
