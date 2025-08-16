@@ -9,6 +9,7 @@ use std::io;
 use std::io::Write;
 use std::collections::HashMap;
 use std::fs::File;
+use enable_ansi_support;
 
 
 fn save(data: &mut User) {
@@ -140,12 +141,14 @@ impl Help {
 
 
 struct Commands {
-    user: User
-
+    user: User,
+    story: Story,
 }
 
 impl Commands {
-    fn new(command: &str, story: &mut Story) {
+
+    fn new(command: &str) {
+        let mut story = Story::init(User::new("","c"));
         let args = command.split(" ");
         let args: Vec<&str> = args.collect();
         let command = args[0];
@@ -288,20 +291,27 @@ impl User {
 
 fn main() {
 
-    let mut gamerunning = true;
-    let mut story = Story::init(User::new("","c"));
-    println!("\r\nWelcome to the game. If you are new, Please type the command [{}] to get started. If you know what to do, please use whatever {} you wish!!!\r\n", "help".green(), "command".green());
+    match enable_ansi_support::enable_ansi_support() {
+        Ok(()) => {
 
-    while gamerunning {
-        print!("[{}]: ", "Command".blue().bold());
-        std::io::stdout().flush().unwrap();
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read input.");
-        let input = input.trim();
-        if input == "quit" {
-            gamerunning = false;
-        } else {
-            Commands::new(&input, &mut story);
-        };
+            let mut gamerunning = true;
+            println!("\r\nWelcome to the game. If you are new, Please type the command [{}] to get started. If you know what to do, please use whatever {} you wish!!!\r\n", "help".green(), "command".green());
+
+            while gamerunning {
+                print!("[{}]: ", "Command".blue().bold());
+                std::io::stdout().flush().unwrap();
+                let mut input = String::new();
+                io::stdin().read_line(&mut input).expect("Failed to read input.");
+                let input = input.trim();
+                if input == "quit" {
+                    gamerunning = false;
+                } else {
+                    Commands::new(&input);
+                };
+            }
+        }
+        Err(_) => {
+
+        }
     }
 }
